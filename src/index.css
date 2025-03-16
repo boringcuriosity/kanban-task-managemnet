@@ -4,9 +4,16 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --transition-speed: 0.2s;
+  --transition-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
 body {
-  @apply bg-background text-content;
+  @apply bg-background text-content antialiased overflow-x-hidden;
   font-family: 'Inter', sans-serif;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Smooth scrolling */
@@ -16,8 +23,8 @@ html {
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -25,10 +32,270 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
-  border-radius: 4px;
+  @apply bg-gray-200 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+  @apply bg-gray-300;
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+/* Smooth transitions */
+* {
+  transition: background-color var(--transition-speed) ease,
+              border-color var(--transition-speed) ease,
+              transform var(--transition-speed) ease,
+              opacity var(--transition-speed) ease,
+              box-shadow var(--transition-speed) ease;
+}
+
+/* Card hover and drag effects */
+.task-card {
+  @apply transform-gpu;
+  transition: all var(--transition-speed) var(--transition-bounce);
+}
+
+.task-card:hover {
+  @apply shadow-md -translate-y-0.5;
+}
+
+.task-card.dragging {
+  @apply shadow-lg scale-105 rotate-1;
+  transition-duration: 0s;
+}
+
+/* Improve touch response */
+@media (hover: none) {
+  .task-card {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .task-card:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Column styles */
+.kanban-column {
+  @apply backdrop-blur-lg bg-white/40;
+  transition: all var(--transition-speed) ease;
+}
+
+.kanban-column:hover {
+  @apply bg-white/60;
+}
+
+.kanban-column.drop-active {
+  @apply bg-white/80 ring-2 ring-primary/20 scale-[1.01];
+}
+
+/* Dialog animations */
+.dialog-overlay {
+  @apply fixed inset-0 bg-black/30 backdrop-blur-sm;
+  animation: fadeIn 0.2s ease;
+}
+
+.dialog-content {
+  animation: slideUp 0.3s var(--transition-bounce);
+}
+
+/* Mobile dialog animations */
+@media (max-width: 640px) {
+  .dialog-content {
+    animation: slideUpMobile 0.4s var(--transition-bounce);
+  }
+}
+
+@keyframes slideUpMobile {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Button hover effects */
+button {
+  transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-primary {
+  @apply bg-primary text-white relative overflow-hidden;
+  transition: all var(--transition-speed) var(--transition-bounce);
+}
+
+.btn-primary:hover {
+  @apply bg-primary/90 shadow-md shadow-primary/20 -translate-y-0.5;
+}
+
+.btn-primary:active {
+  @apply translate-y-0 shadow-sm;
+}
+
+.btn-secondary {
+  @apply bg-gray-100 text-gray-700;
+  transition: all var(--transition-speed) var(--transition-bounce);
+}
+
+.btn-secondary:hover {
+  @apply bg-gray-200/80 -translate-y-0.5;
+}
+
+.btn-secondary:active {
+  @apply translate-y-0;
+}
+
+/* Input focus effects */
+input:focus, 
+select:focus, 
+textarea:focus {
+  @apply ring-2 ring-primary/20 border-primary/30;
+  transition: all var(--transition-speed) var(--transition-bounce);
+}
+
+/* Label hover effects */
+.label-chip {
+  transition: all var(--transition-speed) var(--transition-bounce);
+}
+
+.label-chip:hover {
+  @apply shadow-sm -translate-y-0.5;
+  filter: brightness(1.05);
+}
+
+/* Task count badge animation */
+.task-count {
+  animation: scaleIn 0.2s var(--transition-bounce);
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Drag handle fade animation */
+.drag-handle {
+  @apply opacity-0 transition-opacity duration-200;
+}
+
+.task-card:hover .drag-handle {
+  @apply opacity-100;
+}
+
+/* Override default touch behavior */
+.no-tap-highlight {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Mobile scroll hint animation */
+@keyframes scrollHint {
+  0%, 100% { transform: translateX(0); opacity: 0.5; }
+  50% { transform: translateX(10px); opacity: 1; }
+}
+
+.scroll-hint::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(to left, rgba(255,255,255,0.2), transparent);
+  border-radius: 20px;
+  animation: scrollHint 1.5s ease-in-out infinite;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.can-scroll .scroll-hint::after {
+  opacity: 1;
+}
+
+/* Tablet and mobile optimizations */
+@media (max-width: 768px) {
+  .task-card {
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+    touch-action: pan-y pinch-zoom;
+  }
+
+  .dialog-content {
+    margin: 0;
+    max-height: 100vh;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .dialog-overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Improve touch targets */
+  button, 
+  input, 
+  select {
+    min-height: 44px;
+  }
+
+  /* Prevent elastic scroll at screen edges */
+  .prevent-overscroll {
+    overscroll-behavior: contain;
+  }
+
+  /* Add momentum scrolling */
+  .smooth-momentum {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+}
+
+/* Better active states for touch devices */
+@media (hover: none) {
+  .btn-primary:active {
+    transform: scale(0.96);
+  }
+
+  .btn-secondary:active {
+    background-color: rgb(243 244 246 / 0.8);
+  }
+
+  .task-card:active {
+    transform: scale(0.98);
+  }
 }

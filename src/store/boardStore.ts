@@ -85,9 +85,10 @@ export const useBoardStore = create<BoardState>((set) => ({
             .find((c) => c.id === fromColumnId)
             ?.tasks.find((t) => t.id === taskId);
           if (task) {
+            const updatedTask = { ...task, columnId: toColumnId };
             return {
               ...col,
-              tasks: [...col.tasks, { ...task, columnId: toColumnId }],
+              tasks: [...col.tasks, updatedTask],
             };
           }
         }
@@ -97,15 +98,17 @@ export const useBoardStore = create<BoardState>((set) => ({
     }),
   addTask: (columnId, taskData) =>
     set((state) => {
+      const taskId = Math.random().toString(36).substring(2, 11);
       const newTask: Task = {
         ...taskData,
-        id: Math.random().toString(36).substr(2, 9),
+        id: taskId,
         columnId,
       };
+
       return {
         columns: state.columns.map((col) =>
           col.id === columnId
-            ? { ...col, tasks: [...col.tasks, newTask] }
+            ? { ...col, tasks: [newTask, ...col.tasks] }
             : col
         ),
       };
